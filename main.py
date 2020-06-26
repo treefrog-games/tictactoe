@@ -21,6 +21,13 @@ class GameEngine:
             if cell.text == '':
                 cell.text = 'o'
                 break
+        self.check_state()
+
+    def my_move(self):
+        self.check_state()
+
+    def check_state(self):
+        pass
 
 
 class Cell(Button):
