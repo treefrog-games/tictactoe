@@ -27,7 +27,7 @@ class Cell(Button):
     def __init__(self, game, mid, **kwargs):
         self.width = 10
         self.height = 10
-        self.cellid = mid
+        self.cell_id = mid
         self.font_size = '100dp'
         self.text = ''
         self.game = game
@@ -35,7 +35,7 @@ class Cell(Button):
     
     def on_press(self):
         self.text = 'x'
-        print('press ' + str(self.cellid))
+        print('press ' + str(self.cell_id))
         self.game.enemy_move()
 
 
