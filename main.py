@@ -1,0 +1,49 @@
+from kivy.app import App
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.screenmanager import Screen
+
+global game
+
+class GameEngine():
+    state = 0
+    def __init__(self, *arg):
+        self.map = [[0  for i in range(arg[0])] for j in range(arg[0])]
+        self.field = GridLayout(cols=arg[0])
+        for i in range(arg[0]*arg[0]):
+            self.field.add_widget(Cell(i))
+
+    def stopGame(self):
+        self.state = 1
+    
+    def enemy_move(self):
+        for cell in self.field.children:
+            if cell.text == '':
+                cell.text = '0'
+                break
+
+class Cell(Button):
+    def __init__(self, mid, **kwargs):
+        self.width = 10
+        self.height = 10
+        self.cellid = mid
+        self.font_size = '100dp'
+        self.text = ''
+        super().__init__(**kwargs)
+    
+    def on_press(self):
+        self.text = 'x'
+        print('press ' + str(self.cellid))
+        game.enemy_move()
+
+ 
+game = GameEngine(3) 
+
+class MainApp(App):
+    def build(self):
+        screen = Screen()
+        screen.add_widget(game.field)
+        return screen
+    
+
+MainApp().run()
