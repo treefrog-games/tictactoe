@@ -2,11 +2,13 @@ from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
+from kivy.uix.label import Label
 
 
 class GameEngine:
 
-    def __init__(self, demention):
+    def __init__(self, demention, screen):
+        self.screen = screen        
         self.state = True
         self.demention = demention
         self.field = GridLayout(cols=demention)
@@ -84,7 +86,7 @@ class GameEngine:
             if enemy_count == self.demention:
                 self.lose()
                 result = False
-            print("enemy my", enemy_count, my_count)
+            # print("enemy my", enemy_count, my_count)
 
         # Проход по побочной диагональ
         my_count = 0
@@ -105,9 +107,16 @@ class GameEngine:
         return result
 
     def lose(self):
-        print('game over')
+        self.end_game('Game over :-(')
+
     def win(self):
-        print("Win!!!")
+        self.end_game("Win!!!")
+        
+    
+    def end_game(self, _text):
+        label = Label(text=_text)
+        self.screen.clear_widgets()
+        self.screen.add_widget(label)
 
 
 class Cell(Button):
@@ -132,9 +141,10 @@ class Cell(Button):
 
 class MainApp(App):
     def build(self):
-        game = GameEngine(3)
-        screen = Screen()
+        screen = Screen()        
+        game = GameEngine(3, screen)
         screen.add_widget(game.field)
+        
         return screen
     
 
