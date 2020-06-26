@@ -5,13 +5,19 @@ from kivy.uix.screenmanager import Screen
 
 
 class GameEngine:
-    state = 0
 
-    def __init__(self, *arg):
-        self.map = [[0  for i in range(arg[0])] for j in range(arg[0])]
-        self.field = GridLayout(cols=arg[0])
-        for i in range(arg[0]*arg[0]):
+    def __init__(self, demention):
+        self.state = True
+        self.demention = demention
+        self.field = GridLayout(cols=demention)
+        for i in range(demention * demention):
             self.field.add_widget(Cell(self, i))
+
+    def get_cell(self, x, y):
+        revers_array = self.field.children[::-1].copy()
+        index = x * (self.demention - 1) + y + x
+        # print(index)
+        return revers_array[index]
 
     def stop_game(self):
         self.state = 1
@@ -20,14 +26,57 @@ class GameEngine:
         for cell in self.field.children:
             if cell.text == '':
                 cell.text = 'o'
+                cell.is_enemy = True
                 break
         self.check_state()
 
     def my_move(self):
-        self.check_state()
+        if self.check_state():
+            self.enemy_move()
 
     def check_state(self):
-        pass
+    
+        result = self.state
+        
+        # Проход по строкам
+        for row in range(self.demention):
+            my_count = 0
+            enemy_count = 0
+            for column in range(self.demention):
+                if self.get_cell(row, column).is_my:
+                    my_count += 1
+                if self.get_cell(row, column).is_enemy:
+                    enemy_count += 1 
+            if my_count == self.demention:
+                self.win()
+                result = False
+            if enemy_count == self.demention:
+                self.lose()
+                result = False
+
+        # Проход по столбцам
+        for column in range(self.demention):
+            my_count = 0
+            enemy_count = 0
+            for row in range(self.demention):
+                if self.get_cell(row, column).is_my:
+                    my_count += 1
+                if self.get_cell(row, column).is_enemy:
+                    enemy_count += 1 
+            if my_count == self.demention:
+                self.win()
+                result = False
+            if enemy_count == self.demention:
+                self.lose()
+                result = False
+
+        self.state = result
+        return result
+
+    def lose(self):
+        print('game over')
+    def win(self):
+        print("Win!!!")
 
 
 class Cell(Button):
@@ -38,12 +87,16 @@ class Cell(Button):
         self.font_size = '100dp'
         self.text = ''
         self.game = game
+        self.is_my = False
+        self.is_enemy = False
         super().__init__(**kwargs)
     
     def on_press(self):
-        self.text = 'x'
-        print('press ' + str(self.cell_id))
-        self.game.enemy_move()
+        if not self.is_my and not self.is_enemy and self.game.state:
+            self.is_my = True
+            self.text = 'x'
+            print('press ' + str(self.cell_id))
+            self.game.my_move()
 
 
 class MainApp(App):
