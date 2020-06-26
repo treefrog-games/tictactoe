@@ -3,7 +3,11 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
 from kivy.uix.label import Label
-
+'''
+    Главный модуль игры крестики-нолики.
+    @author ms_subbotin
+    
+'''
 
 class GameEngine:
 
