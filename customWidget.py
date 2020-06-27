@@ -41,10 +41,32 @@ class StartButton(Button):
     pass
 
 class PlusButton(Button):
-    pass
+
+    def __init__(self, dimention, dimention_label, **kwargs):
+        self.dimention = dimention
+        self.dimention_label = dimention_label
+        super().__init__(**kwargs)
+        
+    def on_press(self):
+        self.dimention = int(self.dimention_label.text)
+        if self.dimention < 9:
+            self.dimention += 1
+            self.dimention_label.text = str(self.dimention)
+            print('+')
 
 class MinusButton(Button):
-    pass
+    
+    def __init__(self, dimention, dimention_label, **kwargs):
+        self.dimention = dimention
+        self.dimention_label = dimention_label
+        super().__init__(**kwargs)
+        
+    def on_press(self):
+        self.dimention = int(self.dimention_label.text)
+        if self.dimention >= 4:
+            self.dimention -= 1
+            self.dimention_label.text = str(self.dimention)
+            print('-')
 
 class StartScreen(GridLayout):
 
@@ -54,10 +76,10 @@ class StartScreen(GridLayout):
         self.dimention = 3
         self.cols = 1
 
-        self.start_button = StartButton(text="Start?")
-        self.plus_button = PlusButton(text="+")
-        self.minus_button =  MinusButton(text="-")
         self.dimention_label = Label(text=str(self.dimention))
+        self.start_button = StartButton(text="Start?")
+        self.plus_button = PlusButton(self.dimention, self.dimention_label, text="+")
+        self.minus_button =  MinusButton(self.dimention, self.dimention_label, text="-")
 
         self.add_widget(self.plus_button)
         self.add_widget(self.minus_button)

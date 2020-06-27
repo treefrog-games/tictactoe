@@ -11,10 +11,11 @@ class MainApp(App):
     def build(self):
         screen = Screen()
         # start_screen = StartScreen()
-        # screen.add_widget(start_screen)        
         game = GameEngine(3, screen)
-        screen.add_widget(game.field)
         
+        screen.add_widget(game.field)
+        # screen.add_widget(start_screen)        
+
         return screen
     
 
