@@ -13,6 +13,7 @@ class GameEngine:
         self.screen = screen        
         self.state = True
         self.demention = demention
+        self.move_count = 0
         self.field = GridLayout(cols=demention)
         for i in range(demention * demention):
             self.field.add_widget(Cell(self, i))
@@ -34,9 +35,11 @@ class GameEngine:
                 cell.text = 'o'
                 cell.is_enemy = True
                 break
+        self.move_count += 1
         self.check_state()
 
     def my_move(self):
+        self.move_count += 1
         if self.check_state():
             self.enemy_move()
 
@@ -110,13 +113,9 @@ class GameEngine:
                 result = False
         
         # Ничья 
-        my_count = 0
-        for cell in self.field.children:
-            if cell.is_my or cell.is_enemy:
-                my_count += 1
-            if my_count >= 9:
-                self.standoff()
-                result =False
+        if self.move_count >= 9:
+            self.standoff()
+            result =False
 
         self.state = result
         return result
@@ -132,6 +131,7 @@ class GameEngine:
         
     
     def end_game(self, _text):
+        self.move_count = 0
         restart = RestartButton(self, text=_text)
         self.screen.add_widget(restart)
     
