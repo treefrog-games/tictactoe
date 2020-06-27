@@ -128,9 +128,14 @@ class GameEngine:
         
     
     def end_game(self, _text):
-        label = Label(text=_text)
-        self.screen.clear_widgets()
-        self.screen.add_widget(label)
+        restart = RestartButton(self, text=_text)
+        self.screen.add_widget(restart)
+    
+    def restar_game(self):
+        if not self.state:
+            for cell in self.field.children:
+                cell.is_my, cell.is_enemy, cell.text = False, False, ''
+            self.state = True
 
 
 class Cell(Button):
@@ -151,6 +156,19 @@ class Cell(Button):
             self.text = 'x'
             print('press ' + str(self.cell_id))
             self.game.my_move()
+
+class RestartButton(Button):
+    def __init__(self, game, **kwargs):
+        self.game = game
+        super().__init__(**kwargs)
+
+    def on_press(self):
+        print('restart')
+        self.parent.children[0].text = 'rs'
+        self.parent.remove_widget(self.parent.children[0])
+        self.game.restar_game()
+
+
 
 
 class MainApp(App):
