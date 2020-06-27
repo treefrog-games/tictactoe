@@ -22,7 +22,6 @@ class GameEngine:
     def get_cell(self, x, y):
         revers_array = self.field.children[::-1].copy()
         index = x * (self.demention - 1) + y + x
-        # print(x, y, index)
         return revers_array[index]
 
     def stop_game(self):
@@ -90,7 +89,6 @@ class GameEngine:
             if enemy_count == self.demention:
                 self.lose()
                 result = False
-            # print("enemy my", enemy_count, my_count)
 
         # Проход по побочной диагональ
         my_count = 0
@@ -106,6 +104,15 @@ class GameEngine:
             if enemy_count == self.demention:
                 self.lose()
                 result = False
+        
+        # Ничья 
+        my_count = 0
+        for cell in self.field.children:
+            if cell.is_my or cell.is_enemy:
+                my_count += 1
+            if my_count >= 8:
+                self.standoff()
+                result =False
 
         self.state = result
         return result
@@ -115,6 +122,9 @@ class GameEngine:
 
     def win(self):
         self.end_game("Win!!!")
+    
+    def standoff(self):
+        self.end_game('Standoff')
         
     
     def end_game(self, _text):
