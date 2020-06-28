@@ -42,30 +42,30 @@ class StartButton(Button):
 
 class PlusButton(Button):
 
-    def __init__(self, dimention, dimention_label, **kwargs):
-        self.dimention = dimention
-        self.dimention_label = dimention_label
+    def __init__(self, dimension, dimension_label, **kwargs):
+        self.dimension = dimension
+        self.dimension_label = dimension_label
         super().__init__(**kwargs)
         
     def on_press(self):
-        self.dimention = int(self.dimention_label.text)
-        if self.dimention < 9:
-            self.dimention += 1
-            self.dimention_label.text = str(self.dimention)
+        self.dimension = int(self.dimension_label.text)
+        if self.dimension < 9:
+            self.dimension += 1
+            self.dimension_label.text = str(self.dimension)
             print('+')
 
 class MinusButton(Button):
     
-    def __init__(self, dimention, dimention_label, **kwargs):
-        self.dimention = dimention
-        self.dimention_label = dimention_label
+    def __init__(self, dimension, dimension_label, **kwargs):
+        self.dimension = dimension
+        self.dimension_label = dimension_label
         super().__init__(**kwargs)
         
     def on_press(self):
-        self.dimention = int(self.dimention_label.text)
-        if self.dimention >= 4:
-            self.dimention -= 1
-            self.dimention_label.text = str(self.dimention)
+        self.dimension = int(self.dimension_label.text)
+        if self.dimension >= 4:
+            self.dimension -= 1
+            self.dimension_label.text = str(self.dimension)
             print('-')
 
 class StartScreen(GridLayout):
@@ -73,15 +73,15 @@ class StartScreen(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.dimention = 3
+        self.dimension = 3
         self.cols = 1
 
-        self.dimention_label = Label(text=str(self.dimention))
+        self.dimension_label = Label(text=str(self.dimension))
         self.start_button = StartButton(text="Start?")
-        self.plus_button = PlusButton(self.dimention, self.dimention_label, text="+")
-        self.minus_button =  MinusButton(self.dimention, self.dimention_label, text="-")
+        self.plus_button = PlusButton(self.dimension, self.dimension_label, text="+")
+        self.minus_button =  MinusButton(self.dimension, self.dimension_label, text="-")
 
         self.add_widget(self.plus_button)
         self.add_widget(self.minus_button)
-        self.add_widget(self.dimention_label)
+        self.add_widget(self.dimension_label)
         self.add_widget(self.start_button)
