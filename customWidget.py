@@ -7,8 +7,9 @@ from kivy.uix.label import Label
 
 '''
 
+
 class Cell(Button):
-    def __init__(self, game, mid, **kwargs):
+    def __init__(self, game, mid, row_pos, column_pos, **kwargs):
         self.width = 10
         self.height = 10
         self.cell_id = mid
@@ -17,6 +18,8 @@ class Cell(Button):
         self.game = game
         self.is_my = False
         self.is_enemy = False
+        self.row_pos = row_pos
+        self.column_pos = column_pos
         super().__init__(**kwargs)
     
     def on_press(self):
@@ -24,7 +27,7 @@ class Cell(Button):
             self.is_my = True
             self.text = 'x'
             print('press ' + str(self.cell_id))
-            self.game.my_move()
+            self.game.my_move(self)
 
 class RestartButton(Button):
 
