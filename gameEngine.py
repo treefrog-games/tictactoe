@@ -31,6 +31,8 @@ class GameEngine:
         has_enemy_in_line = False
         me_in_row = 0
         me_in_column = 0
+        me_in_main_diag = 0
+        me_in_reverse_diag = 0
         potential_position = None
         for i in range(self.dimension):
             current_cell = self.get_cell(i, my_column)
@@ -58,10 +60,41 @@ class GameEngine:
             column_result = self.get_cell(my_row, potential_col_position)
             print('column potential', column_result.row_pos, column_result.column_pos)
 
-        if me_in_row >= my_column:
-            result = row_result
-        else:
-            result = column_result
+        has_enemy_in_line = False
+        potential_main_diag_position = None
+        for i in range(self.dimension):
+            current_cell = self.get_cell(i, i)
+            if current_cell.is_enemy:
+                has_enemy_in_line = True
+            elif current_cell.is_my:
+                me_in_main_diag += 1
+            else:
+                potential_main_diag_position = i
+        print ('me_in_main_diag', me_in_main_diag)
+        if (potential_main_diag_position is not None) and (not has_enemy_in_line) and me_in_main_diag > 1:
+            result = self.get_cell(potential_main_diag_position, potential_main_diag_position)
+            print('main potential', result.row_pos, result.column_pos)
+
+        has_enemy_in_line = False
+        potential_reverse_diag_position = None
+        for i in range(self.dimension):
+            current_cell = self.get_cell(i, self.dimension - i -1)
+            if current_cell.is_enemy:
+                has_enemy_in_line = True
+            elif current_cell.is_my:
+                me_in_reverse_diag += 1
+            else:
+                potential_reverse_diag_position = i
+        print('me_in_reverse_diag', me_in_main_diag)
+        if (potential_reverse_diag_position is not None) and (not has_enemy_in_line) and me_in_reverse_diag > 1:
+            result = self.get_cell(potential_reverse_diag_position, self.dimension - potential_reverse_diag_position - 1)
+            print('reverse potential', result.row_pos, result.column_pos)
+
+        if result is None:
+            if me_in_row >= my_column:
+                result = row_result
+            else:
+                result = column_result
         return result
 
     def get_cell(self, x, y):
