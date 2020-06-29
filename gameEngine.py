@@ -30,6 +30,8 @@ class GameEngine:
         for cell in self.field.children:
             cell.weight = 0
         for cell in self.field.children:
+            cell.weight = 0
+        for cell in self.field.children:
             if not cell.is_my and not cell.is_enemy:
                 neighbors = self.get_neighbours_cells(cell)
                 for neighbor in neighbors:
