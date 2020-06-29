@@ -21,9 +21,14 @@ class GameEngine:
             column_pos = i % dimension
             print('create: ', i, row_pos, column_pos)
             self.field.add_widget(Cell(self, i, row_pos, column_pos))
-        
+        self.set_weight()
 
     def set_weight(self):
+        '''
+        Метод разачи весов
+        '''
+        for cell in self.field.children:
+            cell.weight = 0
         for cell in self.field.children:
             if not cell.is_my and not cell.is_enemy:
                 neighbors = self.get_neighbours_cells(cell)
@@ -34,85 +39,11 @@ class GameEngine:
                         cell.weight += 2
                     if neighbor.is_enemy:
                         cell.weight += 3
-            print
-
-    def get_optimal_cell_after(self, cell):
-        my_row = cell.row_pos
-        my_column = cell.column_pos
-        print('my: ', my_row, my_column)
-        result = None
-        row_result = None
-        column_result = None
-        has_enemy_in_line = False
-        me_in_row = 0
-        me_in_column = 0
-        me_in_main_diag = 0
-        me_in_reverse_diag = 0
-        potential_position = None
-        for i in range(self.dimension):
-            current_cell = self.get_cell(i, my_column)
-            if current_cell.is_enemy:
-                has_enemy_in_line = True
-            elif current_cell.is_my:
-                me_in_row += 1
-            else:
-                potential_position = i
-        if (potential_position is not None) and (not has_enemy_in_line):
-            row_result = self.get_cell(potential_position, my_column)
-            print('row potential', row_result.row_pos, row_result.column_pos)
-
-        has_enemy_in_line = False
-        potential_col_position = None
-        for i in range(self.dimension):
-            current_cell = self.get_cell(my_row, i)
-            if current_cell.is_enemy:
-                has_enemy_in_line = True
-            elif current_cell.is_my:
-                me_in_column += 1
-            else:
-                potential_col_position = i
-        if potential_col_position is not None and not has_enemy_in_line:
-            column_result = self.get_cell(my_row, potential_col_position)
-            print('column potential', column_result.row_pos, column_result.column_pos)
-
-        has_enemy_in_line = False
-        potential_main_diag_position = None
-        for i in range(self.dimension):
-            current_cell = self.get_cell(i, i)
-            if current_cell.is_enemy:
-                has_enemy_in_line = True
-            elif current_cell.is_my:
-                me_in_main_diag += 1
-            else:
-                potential_main_diag_position = i
-        print ('me_in_main_diag', me_in_main_diag)
-        if (potential_main_diag_position is not None) and (not has_enemy_in_line) and me_in_main_diag > 1:
-            result = self.get_cell(potential_main_diag_position, potential_main_diag_position)
-            print('main potential', result.row_pos, result.column_pos)
-
-        has_enemy_in_line = False
-        potential_reverse_diag_position = None
-        for i in range(self.dimension):
-            current_cell = self.get_cell(i, self.dimension - i -1)
-            if current_cell.is_enemy:
-                has_enemy_in_line = True
-            elif current_cell.is_my:
-                me_in_reverse_diag += 1
-            else:
-                potential_reverse_diag_position = i
-        print('me_in_reverse_diag', me_in_main_diag)
-        if (potential_reverse_diag_position is not None) and (not has_enemy_in_line) and me_in_reverse_diag > 1:
-            result = self.get_cell(potential_reverse_diag_position, self.dimension - potential_reverse_diag_position - 1)
-            print('reverse potential', result.row_pos, result.column_pos)
-
-        if result is None:
-            if me_in_row >= my_column:
-                result = row_result
-            else:
-                result = column_result
-        return result
 
     def get_cell(self, x, y):
+        '''
+        Гетер ячейки по координатам
+        '''
         result = None
         for cell in self.field.children:
             if cell.row_pos == x and cell.column_pos == y:
@@ -123,11 +54,11 @@ class GameEngine:
         x = cell.row_pos
         y = cell.column_pos
         list_neighbors = set()
-        for hei in map(self.get_cell, range(x-1, x+1, 1), repeat(y)):
+        for hei in map(self.get_cell, range(x-1, x+2, 1), repeat(y)):
             list_neighbors.add(hei)
-        for hei in map(self.get_cell, range(x-1, x+1, 1), repeat(y-1)):
+        for hei in map(self.get_cell, range(x-1, x+2, 1), repeat(y-1)):
             list_neighbors.add(hei)
-        for hei in  map(self.get_cell, range(x-1, x+1, 1), repeat(y+1)):
+        for hei in  map(self.get_cell, range(x-1, x+2, 1), repeat(y+1)):
             list_neighbors.add(hei)
         list_neighbors.remove(self.get_cell(x, y))
         list_neighbors.discard(None)
@@ -140,73 +71,67 @@ class GameEngine:
         '''
             Действия противника
         '''
-        min_weight = 10000
+        max_weight = 0
         for cell in self.field.children:
-            if cell.weight < min_weight:
-                min_weight = cell.weight
+            if cell.weight > max_weight:
+                max_weight = cell.weight
 
         for cell in self.field.children:
-            if cell.weight == min_weight:
+            if cell.weight == max_weight and not cell.is_my and not cell.is_enemy:
                 cell.text = 'o'
                 cell.is_enemy = True
                 break
-        # potential_move = self.get_optimal_cell_after(my_cell)
-        # if potential_move is None:
-        #     for cell in self.field.children:
-        #         if cell.text == '':
-        #             potential_move = cell
-        #             break
-
-        # potential_move.text = 'o'
-        # potential_move.is_enemy = True
         self.move_count += 1
         self.check_state()
 
     def my_move(self, cell):
+        cell.text = 'x'
+        self.is_my = True
         self.move_count += 1
         self.set_weight()
         if self.check_state():
             self.enemy_move(cell)
 
-    def check_state(self):
+    def check_state(self, deep=3):
         '''
         Проверка текущего состояния игры
 
         '''
         result = self.state
+        my_count = 0
+        enemy_count = 0
 
-        # Проход по строкам
-        for row in range(self.dimension):
+        # проверка по линиям
+        for y in range(self.dimension):
+            for cell in map(self.get_cell, range(0, deep, 1), repeat(y)):
+                if cell.is_my:
+                    my_count += 1
+                if cell.is_enemy:
+                    enemy_count += 1
+                if my_count == self.dimension:
+                    self.win()
+                    result = False
+                if enemy_count == self.dimension:
+                    self.lose()
+                    result = False
             my_count = 0
             enemy_count = 0
-            for column in range(self.dimension):
-                if self.get_cell(row, column).is_my:
-                    my_count += 1
-                if self.get_cell(row, column).is_enemy:
-                    enemy_count += 1 
-            if my_count == self.dimension:
-                self.win()
-                result = False
-            if enemy_count == self.dimension:
-                self.lose()
-                result = False
 
-        # Проход по столбцам
-        for column in range(self.dimension):
+        for x in range(self.dimension):
+            for cell in map(self.get_cell, repeat(x), range(0, deep,1)):
+                if cell.is_my:
+                    my_count += 1
+                if cell.is_enemy:
+                    enemy_count += 1
+                if my_count == self.dimension:
+                    self.win()
+                    result = False
+                if enemy_count == self.dimension:
+                    self.lose()
+                    result = False
             my_count = 0
             enemy_count = 0
-            for row in range(self.dimension):
-                if self.get_cell(row, column).is_my:
-                    my_count += 1
-                if self.get_cell(row, column).is_enemy:
-                    enemy_count += 1 
-            if my_count == self.dimension:
-                self.win()
-                result = False
-            if enemy_count == self.dimension:
-                self.lose()
-                result = False
-            
+
         # Проход по главная диагональ
         my_count = 0
         enemy_count = 0
