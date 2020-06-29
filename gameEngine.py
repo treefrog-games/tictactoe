@@ -21,9 +21,11 @@ class GameEngine:
             column_pos = i % dimension
             print('create: ', i, row_pos, column_pos)
             self.field.add_widget(Cell(self, i, row_pos, column_pos))
-        
+        self.set_weight()
 
     def set_weight(self):
+        for cell in self.field.children:
+            cell.weight = 0
         for cell in self.field.children:
             if not cell.is_my and not cell.is_enemy:
                 neighbors = self.get_neighbours_cells(cell)
@@ -123,11 +125,11 @@ class GameEngine:
         x = cell.row_pos
         y = cell.column_pos
         list_neighbors = set()
-        for hei in map(self.get_cell, range(x-1, x+1, 1), repeat(y)):
+        for hei in map(self.get_cell, range(x-1, x+2, 1), repeat(y)):
             list_neighbors.add(hei)
-        for hei in map(self.get_cell, range(x-1, x+1, 1), repeat(y-1)):
+        for hei in map(self.get_cell, range(x-1, x+2, 1), repeat(y-1)):
             list_neighbors.add(hei)
-        for hei in  map(self.get_cell, range(x-1, x+1, 1), repeat(y+1)):
+        for hei in  map(self.get_cell, range(x-1, x+2, 1), repeat(y+1)):
             list_neighbors.add(hei)
         list_neighbors.remove(self.get_cell(x, y))
         list_neighbors.discard(None)
@@ -140,13 +142,13 @@ class GameEngine:
         '''
             Действия противника
         '''
-        min_weight = 10000
+        max_weight = 0
         for cell in self.field.children:
-            if cell.weight < min_weight:
-                min_weight = cell.weight
+            if cell.weight > max_weight:
+                max_weight = cell.weight
 
         for cell in self.field.children:
-            if cell.weight == min_weight:
+            if cell.weight == max_weight and not cell.is_my and not cell.is_enemy:
                 cell.text = 'o'
                 cell.is_enemy = True
                 break
@@ -163,6 +165,8 @@ class GameEngine:
         self.check_state()
 
     def my_move(self, cell):
+        cell.text = 'x'
+        self.is_my = True
         self.move_count += 1
         self.set_weight()
         if self.check_state():
