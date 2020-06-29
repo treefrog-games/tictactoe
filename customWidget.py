@@ -19,6 +19,7 @@ class Cell(Button):
         self.is_my = False
         self.is_enemy = False
         self.row_pos = row_pos
+        self.weight = int()
         self.column_pos = column_pos
         super().__init__(**kwargs)
     

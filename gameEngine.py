@@ -1,5 +1,6 @@
 from kivy.uix.gridlayout import GridLayout
 from customWidget import *
+from itertools import repeat
 '''
 Игровой движок
 
@@ -20,6 +21,20 @@ class GameEngine:
             column_pos = i % dimension
             print('create: ', i, row_pos, column_pos)
             self.field.add_widget(Cell(self, i, row_pos, column_pos))
+        
+
+    def set_weight(self):
+        for cell in self.field.children:
+            if not cell.is_my and not cell.is_enemy:
+                neighbors = self.get_neighbours_cells(cell)
+                for neighbor in neighbors:
+                    if not neighbor.is_my and not neighbor.is_enemy:
+                        cell.weight += 1
+                    if neighbor.is_my:
+                        cell.weight += 2
+                    if neighbor.is_enemy:
+                        cell.weight += 3
+            print
 
     def get_optimal_cell_after(self, cell):
         my_row = cell.row_pos
@@ -103,6 +118,20 @@ class GameEngine:
             if cell.row_pos == x and cell.column_pos == y:
                 result = cell
         return result
+    
+    def get_neighbours_cells(self, cell):
+        x = cell.row_pos
+        y = cell.column_pos
+        list_neighbors = set()
+        for hei in map(self.get_cell, range(x-1, x+1, 1), repeat(y)):
+            list_neighbors.add(hei)
+        for hei in map(self.get_cell, range(x-1, x+1, 1), repeat(y-1)):
+            list_neighbors.add(hei)
+        for hei in  map(self.get_cell, range(x-1, x+1, 1), repeat(y+1)):
+            list_neighbors.add(hei)
+        list_neighbors.remove(self.get_cell(x, y))
+        list_neighbors.discard(None)
+        return list_neighbors
 
     def stop_game(self):
         self.state = 1
@@ -111,20 +140,31 @@ class GameEngine:
         '''
             Действия противника
         '''
-        potential_move = self.get_optimal_cell_after(my_cell)
-        if potential_move is None:
-            for cell in self.field.children:
-                if cell.text == '':
-                    potential_move = cell
-                    break
+        min_weight = 10000
+        for cell in self.field.children:
+            if cell.weight < min_weight:
+                min_weight = cell.weight
 
-        potential_move.text = 'o'
-        potential_move.is_enemy = True
+        for cell in self.field.children:
+            if cell.weight == min_weight:
+                cell.text = 'o'
+                cell.is_enemy = True
+                break
+        # potential_move = self.get_optimal_cell_after(my_cell)
+        # if potential_move is None:
+        #     for cell in self.field.children:
+        #         if cell.text == '':
+        #             potential_move = cell
+        #             break
+
+        # potential_move.text = 'o'
+        # potential_move.is_enemy = True
         self.move_count += 1
         self.check_state()
 
     def my_move(self, cell):
         self.move_count += 1
+        self.set_weight()
         if self.check_state():
             self.enemy_move(cell)
 
@@ -225,3 +265,9 @@ class GameEngine:
             for cell in self.field.children:
                 cell.is_my, cell.is_enemy, cell.text = False, False, ''
             self.state = True
+
+
+if __name__ == "__main__":
+    game = GameEngine(3, screen=None)
+    game.set_weight()
+    print(game)
