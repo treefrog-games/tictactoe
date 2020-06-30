@@ -1,7 +1,16 @@
-<StartScreen>:
+<Screen>:
     canvas:
         Color:
-            rgba: 0.5, 0.5, 1, 1
-        Rectangle:
-            pos: self.pos
-            size: self.size
+            rgba: 1.0, 0.0, 0.0, 1.0
+    size_hint: 1.0, self.size_hint_x / 2
+
+<GridLayout>:
+    spacing: 5, 5
+    pos: 0, 150 # надо делать адаптивно под размер
+
+<Button>:
+    color: 1.0, 0.0, 0.0, 1.0
+
+<RestartButton>
+    spacing: 5, 5
+    pos: 0, 150 # надо делать адаптивно под размер
