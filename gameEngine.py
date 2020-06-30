@@ -46,6 +46,8 @@ class GameEngine:
                         cell.weight += 3
                     if self.potential_victory(cell):
                         cell.weight += 100
+                    if self.potential_defeat(cell):
+                        cell.weight += 1000
                     print
 
     def get_cell(self, row_pos, column_pos):
@@ -108,6 +110,45 @@ class GameEngine:
             neighbors.discard(None)
             for neighbor in neighbors:
                 if neighbor.is_my:
+                    my_count += 1
+                if my_count == 2:
+                    result = True
+        my_count = 0
+        return result
+
+    def potential_defeat(self, cell):
+        result = False
+        my_count = 0
+        neighbors = set(map(self.get_cell, range( -self.dimension, self.dimension, 1), repeat(cell.column_pos)))
+        neighbors.discard(None)
+        for neighbor in neighbors:
+            if neighbor.is_enemy:
+                my_count += 1
+        if my_count == 2:
+            result = True
+        my_count = 0
+        neighbors = set(map(self.get_cell, repeat(cell.row_pos), range( -self.dimension, self.dimension, 1)))
+        neighbors.discard(None)
+        for neighbor in neighbors:
+            if neighbor.is_enemy:
+                my_count += 1
+        if my_count == 2:
+            result = True
+        my_count = 0
+        if cell.row_pos == cell.column_pos:
+            neighbors = set(map(self.get_cell, range(self.dimension), range(self.dimension)))
+            neighbors.discard(None)
+            for neighbor in neighbors:
+                if neighbor.is_enemy:
+                    my_count += 1
+                if my_count == 2:
+                    result = True
+        my_count = 0
+        if self.dimension - cell.row_pos - 1 == cell.column_pos:
+            neighbors = set(map(self.get_cell, range(cell.column_pos, -1, -1), range(self.dimension)))
+            neighbors.discard(None)
+            for neighbor in neighbors:
+                if neighbor.is_enemy:
                     my_count += 1
                 if my_count == 2:
                     result = True
