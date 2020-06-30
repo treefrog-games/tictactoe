@@ -8,6 +8,8 @@ from itertools import repeat
 class GameEngine:
     '''
     Главный класс с логикой противника и реализацией правил игры
+    dimension   - масштаб поля
+    screen      - родительский виджет.
 
     '''
     def __init__(self, dimension, screen):
@@ -26,29 +28,40 @@ class GameEngine:
     def set_weight(self):
         '''
         Метод разачи весов
+
         '''
         for cell in self.field.children:
             cell.weight = 0
+
         for cell in self.field.children:
             cell.weight = 0
         for cell in self.field.children:
             if not cell.is_my and not cell.is_enemy:
                 neighbors = self.get_neighbours_cells(cell)
                 for neighbor in neighbors:
+                    # if cell.weight < 300:
                     if not neighbor.is_my and not neighbor.is_enemy:
                         cell.weight += 1
                     if neighbor.is_my:
                         cell.weight += 2
                     if neighbor.is_enemy:
                         cell.weight += 3
+                    if self.potential_victory(cell):
+                        cell.weight += 100
+                    if self.potential_defeat(cell):
+                        cell.weight += 1000
+                    print
 
-    def get_cell(self, x, y):
+    def get_cell(self, row_pos, column_pos):
         '''
         Гетер ячейки по координатам
+        row_pos     -   строка (x)
+        column_pos  -   столбец (y)
+
         '''
         result = None
         for cell in self.field.children:
-            if cell.row_pos == x and cell.column_pos == y:
+            if cell.row_pos == row_pos and cell.column_pos == column_pos:
                 result = cell
         return result
     
@@ -65,6 +78,84 @@ class GameEngine:
         list_neighbors.remove(self.get_cell(x, y))
         list_neighbors.discard(None)
         return list_neighbors
+    
+    def potential_victory(self, cell):
+        result = False
+        my_count = 0
+        neighbors = set(map(self.get_cell, range( -self.dimension, self.dimension, 1), repeat(cell.column_pos)))
+        neighbors.discard(None)
+        for neighbor in neighbors:
+            if neighbor.is_my:
+                my_count += 1
+        if my_count == 2:
+            result = True
+        my_count = 0
+        neighbors = set(map(self.get_cell, repeat(cell.row_pos), range( -self.dimension, self.dimension, 1)))
+        neighbors.discard(None)
+        for neighbor in neighbors:
+            if neighbor.is_my:
+                my_count += 1
+        if my_count == 2:
+            result = True
+        my_count = 0
+        if cell.row_pos == cell.column_pos:
+            neighbors = set(map(self.get_cell, range(self.dimension), range(self.dimension)))
+            neighbors.discard(None)
+            for neighbor in neighbors:
+                if neighbor.is_my:
+                    my_count += 1
+                if my_count == 2:
+                    result = True
+        my_count = 0
+        if self.dimension - cell.row_pos - 1 == cell.column_pos:
+            neighbors = set(map(self.get_cell, range(cell.column_pos, -1, -1), range(self.dimension)))
+            neighbors.discard(None)
+            for neighbor in neighbors:
+                if neighbor.is_my:
+                    my_count += 1
+                if my_count == 2:
+                    result = True
+        my_count = 0
+        return result
+
+    def potential_defeat(self, cell):
+        result = False
+        my_count = 0
+        neighbors = set(map(self.get_cell, range( -self.dimension, self.dimension, 1), repeat(cell.column_pos)))
+        neighbors.discard(None)
+        for neighbor in neighbors:
+            if neighbor.is_enemy:
+                my_count += 1
+        if my_count == 2:
+            result = True
+        my_count = 0
+        neighbors = set(map(self.get_cell, repeat(cell.row_pos), range( -self.dimension, self.dimension, 1)))
+        neighbors.discard(None)
+        for neighbor in neighbors:
+            if neighbor.is_enemy:
+                my_count += 1
+        if my_count == 2:
+            result = True
+        my_count = 0
+        if cell.row_pos == cell.column_pos:
+            neighbors = set(map(self.get_cell, range(self.dimension), range(self.dimension)))
+            neighbors.discard(None)
+            for neighbor in neighbors:
+                if neighbor.is_enemy:
+                    my_count += 1
+                if my_count == 2:
+                    result = True
+        my_count = 0
+        if self.dimension - cell.row_pos - 1 == cell.column_pos:
+            neighbors = set(map(self.get_cell, range(cell.column_pos, -1, -1), range(self.dimension)))
+            neighbors.discard(None)
+            for neighbor in neighbors:
+                if neighbor.is_enemy:
+                    my_count += 1
+                if my_count == 2:
+                    result = True
+        my_count = 0
+        return result
 
     def stop_game(self):
         self.state = 1
@@ -84,7 +175,7 @@ class GameEngine:
                 cell.is_enemy = True
                 break
         self.move_count += 1
-        self.check_state()
+        self.state = self.check_state()
 
     def my_move(self, cell):
         cell.text = 'x'
@@ -93,6 +184,8 @@ class GameEngine:
         self.set_weight()
         if self.check_state():
             self.enemy_move(cell)
+        else:
+            self.state = self.check_state()
 
     def check_state(self, deep=3):
         '''
@@ -104,32 +197,37 @@ class GameEngine:
         enemy_count = 0
 
         # проверка по линиям
+        # столбцы
         for y in range(self.dimension):
-            for cell in map(self.get_cell, range(0, deep, 1), repeat(y)):
+            for cell in map(self.get_cell, range(0, self.dimension, 1), repeat(y)):
                 if cell.is_my:
                     my_count += 1
                 if cell.is_enemy:
                     enemy_count += 1
-                if my_count == self.dimension:
-                    self.win()
+                if my_count == deep:
+                    if deep == self.dimension:
+                        self.win()
                     result = False
-                if enemy_count == self.dimension:
-                    self.lose()
+                if enemy_count == deep:
+                    if deep == self.dimension:
+                        self.lose()
                     result = False
             my_count = 0
             enemy_count = 0
 
         for x in range(self.dimension):
-            for cell in map(self.get_cell, repeat(x), range(0, deep,1)):
+            for cell in map(self.get_cell, repeat(x), range(0, self.dimension, 1)):
                 if cell.is_my:
                     my_count += 1
                 if cell.is_enemy:
                     enemy_count += 1
-                if my_count == self.dimension:
-                    self.win()
+                if my_count == deep:
+                    if deep == self.dimension:
+                        self.win()
                     result = False
-                if enemy_count == self.dimension:
-                    self.lose()
+                if enemy_count == deep:
+                    if deep == self.dimension:
+                        self.lose()
                     result = False
             my_count = 0
             enemy_count = 0
@@ -142,11 +240,13 @@ class GameEngine:
                 my_count += 1
             if self.get_cell(i, i).is_enemy:
                 enemy_count += 1 
-            if my_count == self.dimension:
-                self.win()
+            if my_count == deep:
+                if deep == self.dimension:
+                    self.win()
                 result = False
-            if enemy_count == self.dimension:
-                self.lose()
+            if enemy_count == deep:
+                if deep == self.dimension:
+                    self.lose()
                 result = False
 
         # Проход по побочной диагональ
@@ -157,11 +257,13 @@ class GameEngine:
                 my_count += 1
             if self.get_cell(row, self.dimension - row - 1).is_enemy:
                 enemy_count += 1 
-            if my_count == self.dimension:
-                self.win()
+            if my_count == deep:
+                if deep == self.dimension:
+                    self.win()
                 result = False
-            if enemy_count == self.dimension:
-                self.lose()
+            if enemy_count == deep:
+                if deep == self.dimension:
+                    self.lose()
                 result = False
         
         # Ничья 
@@ -169,7 +271,7 @@ class GameEngine:
             self.standoff()
             result =False
 
-        self.state = result
+        # self.state = result
         return result
 
     def lose(self):
@@ -188,10 +290,10 @@ class GameEngine:
         self.screen.add_widget(restart)
     
     def restar_game(self):
-        if not self.state:
-            for cell in self.field.children:
-                cell.is_my, cell.is_enemy, cell.text = False, False, ''
-            self.state = True
+        # if not self.state:
+        for cell in self.field.children:
+            cell.is_my, cell.is_enemy, cell.text = False, False, ''
+        self.state = True
 
 
 if __name__ == "__main__":
