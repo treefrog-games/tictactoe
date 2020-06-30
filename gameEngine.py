@@ -9,7 +9,7 @@ class GameEngine:
     '''
     Главный класс с логикой противника и реализацией правил игры
     dimension   - масштаб поля
-    screen      - родительский виджет
+    screen      - родительский виджет.
 
     '''
     def __init__(self, dimension, screen):
