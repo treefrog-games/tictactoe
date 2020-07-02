@@ -2,13 +2,15 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.screenmanager import Screen
 from kivy.uix.label import Label
+from kivy.uix.behaviors import ButtonBehavior  
+from kivy.uix.image import Image
 '''
 Пользовотельские виджеты
 
 '''
 
 
-class Cell(Button):
+class Cell(Button, ButtonBehavior):
     def __init__(self, game, mid, row_pos, column_pos, **kwargs):
         self.width = 10
         self.height = 10

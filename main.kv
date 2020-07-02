@@ -1,15 +1,29 @@
 <Screen>:
-    canvas:
+    canvas.before:
         Color:
-            rgba: 1.0, 0.0, 0.0, 1.0
-    size_hint: 1.0, self.size_hint_x / 2
+            rgba: 0, 1, 0, 1
+        Rectangle:
+            # self here refers to the widget i.e FloatLayout
+            pos: self.pos
+            size: self.size
+
+# <Cell>:
+#     Image:
+#         source:'./png/o.png'  
+#         size: self.texture_size
 
 <GridLayout>:
     spacing: 5, 5
+    padding: 30, 0
     pos: 0, 150 # надо делать адаптивно под размер
+    size_hint: 1.0, self.size_hint_x / 2 
 
 <Button>:
-    color: 1.0, 0.0, 0.0, 1.0
+    color: 1.0, 1.0, 0.0, 1.0
+    Image:
+        source:'./png/o.png'  
+        size: self.texture_size
+        pos: self.pos
 
 <RestartButton>
     spacing: 5, 5
